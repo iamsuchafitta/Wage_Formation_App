@@ -1,0 +1,872 @@
+#drop database company_bd_lab5;
+create database company_bd_lab5;
+use company_bd_lab5; 
+
+create table Wage_system 
+(
+ wage_system_id int not null primary key auto_increment,
+ name varchar (100) not null
+); 
+
+create table Working_time 
+(
+ working_time_id int not null primary key auto_increment,
+ rate_over_time float not null default 1
+); 
+
+create table Rate_over_turnover 
+(
+ rate_over_turnover_id int not null primary key auto_increment,
+ rate_over_turnover float not null default 1
+); 
+
+create table Forms_of_remuneration 
+(
+ forms_of_remuneration_id int not null primary key auto_increment,
+ name varchar (100) not null
+); 
+
+create table Compensation_payments 
+(
+compensation_payments_id int not null primary key auto_increment,
+name varchar (100) not null,
+amound int not null default 20000
+);
+
+create table Fines 
+(
+ fines_id int not null primary key auto_increment,
+ reason varchar (100) not null,
+ type  varchar (100) not null,
+ amound int not null
+); 
+
+create table Incentive_payments 
+(
+ incentive_payments_id int not null primary key auto_increment,
+name varchar (100) not null,
+ type  varchar (100) not null,
+ amound float not null
+); 
+
+create table Positions 
+(
+positions_id int not null primary key auto_increment,
+name varchar (100) not null,
+salary int not null,
+working_days int not null
+); 
+
+create table Turnover 
+(
+turnover_id int not null primary key auto_increment,
+start_date date not null,
+over_date date not null,
+summ int
+); 
+
+create table Subdivision 
+(
+subdivision_id int not null primary key auto_increment,
+name varchar (100) not null,
+sales_plan int,
+turnover_id int not null,
+rate_over_turnover_id int not null default 1,
+constraint  fk_turnover_turnover_id_1  foreign key (turnover_id) references turnover (turnover_id),
+constraint  fk_rate_over_turnover_rate_over_turnover_id_1  foreign key (rate_over_turnover_id) references rate_over_turnover (rate_over_turnover_id)
+); 
+
+create table Employee 
+(
+Employee_id int not null primary key auto_increment,
+full_name varchar(150) not null,
+birth_date date not null,
+subdivision_id int not null,
+constraint  fk_subdivision_subdivision_id_1  foreign key (subdivision_id) references Subdivision (subdivision_id)
+); 
+
+create table Employee_to_positions
+(
+positions_id int not null,
+employee_id int not null,
+primary key (positions_id, employee_id),
+ foreign key (employee_id) references Employee (employee_id),
+ foreign key (positions_id) references Positions (positions_id)
+);
+
+create table Pay
+(
+pay_id int not null primary key auto_increment,
+employee_id int not null,
+working_time_id int not null,
+compensation_payments_id int default null,
+forms_of_remuneration_id int not null,
+wage_system_id int not null,
+income_tax float not null default 0.13,
+appointment_date date not null,
+payment_date date not null,
+foreign key (forms_of_remuneration_id) references forms_of_remuneration (forms_of_remuneration_id),
+foreign key (employee_id) references Employee (employee_id),
+foreign key (working_time_id) references working_time (working_time_id),
+foreign key (compensation_payments_id) references compensation_payments (compensation_payments_id),
+foreign key (wage_system_id) references wage_system (wage_system_id)
+);
+
+create table Fines_to_pay
+(
+pay_id int not null,
+fines_id int not null,
+numbers int,
+primary key (pay_id, fines_id),
+foreign key (pay_id) references Pay (pay_id),
+foreign key (fines_id) references Fines (fines_id)
+);
+
+create table Incentive_payments_to_pay
+(
+pay_id int not null,
+Incentive_payments_id int not null,
+primary key (Incentive_payments_id, pay_id),
+ foreign key (pay_id) references pay (pay_id),
+ foreign key (Incentive_payments_id) references Incentive_payments (Incentive_payments_id)
+);
+
+insert into Wage_system (name) values 
+('Повременная'),
+('Cдельная'),
+('Смешанная');
+ 
+insert into Working_time (rate_over_time) values 
+(0.9),
+(1.0),
+(1.1);
+
+insert into Rate_over_turnover (Rate_over_turnover) values 
+(0.9),
+(1.0),
+(1.1);
+
+insert into Forms_of_remuneration (name) values 
+('Рубли'),
+('Иностранная валюта'),
+('Акции компании');
+
+
+insert into Fines (reason, type, amound) values 
+('За опоздание', 'Процент', 0.3),
+('За неявку', 'Процент', 0.3),
+('За превышение должностных полномочий', 'Сумма', 500),
+('За неуважительное отношение к коллегам/начальству', 'Сумма', 500),
+('За отказ от выполнения прямых обязанностей', 'Сумма', 1000),
+('За систематическое опоздание на работу', 'Сумма', 1500),
+('За самовольное покидание рабочего места (без предупреждения начальства)', 'Сумма', 500),
+('За распитие алкогольных напитков', 'Сумма', 1000),
+('За употребление наркотиков', 'Процент', 1.0),
+('За нахождение на рабочем месте в нетрезвом состоянии', 'Сумма', 5000);
+
+insert into Incentive_payments (name, type, amound) values 
+('Премия', 'Процент', 10),
+('Поощрение', 'Сумма', 3000); 
+
+
+insert into compensation_payments (name) values 
+('Отпускные'),
+('Декретные'),
+('Больничный');
+
+insert into Positions (name, salary, working_days) values 
+('Продавец-консультант', 20000, 20),
+('Инкассатор', 15000, 3),
+('Директор', 100000, 20),
+('Адвокат', 25000, 20),
+('Программист', 25000, 20),
+('Менеджер', 18000, 20),
+('Владелец', 100000, 20),
+('Юрист', 20000, 15),
+('Преподаватель', 35000, 15),
+('Логист', 20000, 15);
+
+insert into Turnover (start_date, over_date, summ) values 
+('2021-01-01', '2021-01-31', 200000),
+('2018-05-01', '2018-05-31', 900000),
+('2019-05-01', '2019-05-31', 900000),
+('2019-07-01', '2019-07-31', 0),
+('2000-01-01', '2000-01-31', 25000),
+('2007-01-01', '2007-01-31', 1000000),
+('2021-02-01', '2021-02-21', 210000),
+('2006-04-01', '2006-04-30', 180000),
+('2005-01-21', '2005-01-31', 750000),
+('2021-01-21', '2021-01-31', 231000);
+
+insert into Subdivision (name, sales_plan, turnover_id, rate_over_turnover_id) values 
+('Офис', 200000, 1, 2),
+('Бухгалтерия', 1000000, 2, 1),
+('Главный офис', 1200000, 3, 1),
+('Техподдержка', 0, 4, 2),
+('Адвокатский кабинет', 0, 4, 2),
+('Кафедра САПР', 0, 4, 3),
+('Канцелярия', 500000, 2, 2),
+('Секретариат', 400000, 3, 3),
+('Служба делопроизводства', 100000, 1, 2),
+('Отдел охраны труда', 0, 4, 2);
+
+
+insert into Employee (full_name, birth_date, subdivision_id) values 
+('Новиков Семен Мэлорович', '2000-04-07', 1),
+('Осипов Григорий Николаевич', '2007-09-28', 2),
+('Миронов Пантелей Валерьевич', '1999-04-03', 3),
+('Комиссаров Яков Ефимович', '2001-05-26', 4),
+('Данилов Авраам Матвеевич', '2002-04-09', 5),
+('Соколов Александр Александрович', '1999-06-06', 6),
+('Колобков Дмитрий Олегович', '2001-01-21', 2),
+('Крылов Павел Александрович', '2005-01-21', 3),
+('Левченко Данила Романович', '2002-01-21', 1),
+('Макаров Ярослав Александрович', '2004-01-21', 4);
+
+insert into Employee_to_positions (employee_id, positions_id) values 
+(1, 1),
+(1, 6),
+(2, 2),
+(3, 3),
+(3, 7),
+(4, 4),
+(4, 8),
+(5, 5),
+(6, 6),
+(7, 7),
+(8, 8),
+(9, 9),
+(10, 10); 
+
+
+insert into Pay (employee_id, working_time_id, forms_of_remuneration_id, wage_system_id, appointment_date, payment_date) values 
+(1, 3, 1, 1, '2021-01-01', '2021-01-02'),
+(2, 2, 1, 2, '2018-05-15', '2018-05-16'),
+(3, 2, 3, 3, '2019-05-23', '2019-05-24'),
+(4, 2, 1, 1, '2019-07-27', '2019-07-28'),
+(5, 2, 1, 2, '2017-03-29', '2017-03-30'),
+(6, 3, 1, 1, '2017-03-30', '2017-03-31'),
+(7, 3, 2, 2, '2021-01-01', '2021-01-02'),
+(8, 3, 3, 1, '2021-01-01', '2021-01-02'),
+(9, 3, 1, 3, '2021-01-01', '2021-01-02'),
+(10, 3, 2, 1, '2021-01-01', '2021-01-02');
+
+
+insert into Fines_to_pay (pay_id, fines_id, numbers) values 
+(2, 2, 2);
+
+
+insert into Incentive_payments_to_pay (pay_id, incentive_payments_id) values 
+(1, 1),
+(5, 2),
+(6, 1),
+(7, 2),
+(8, 1),
+(9, 1),
+(10, 1);
+
+UPDATE `company_bd_lab5`.`pay` SET `compensation_payments_id` = '3' WHERE (`pay_id` = '3');
+
+################ lab 5 ####################
+-- -----------------Добавление данных--------------------------
+show variables like 'secure_file_priv';
+
+load data infile 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\turnover.csv'
+into table turnover
+fields terminated by ','
+-- lines terminated by '/n'
+ignore 1 lines
+(start_date, over_date, summ);
+
+load data infile 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\subdivision.csv'
+into table subdivision
+fields terminated by ','
+-- lines terminated by '/n'
+ignore 1 lines
+(name, sales_plan, turnover_id, rate_over_turnover_id);
+
+load data infile 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\employee.csv'
+into table employee
+fields terminated by ','
+-- lines terminated by '/n'
+ignore 1 lines
+(full_name, birth_date, subdivision_id);
+
+load data infile 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\pay.csv'
+into table pay
+fields terminated by ','
+-- lines terminated by '\n'
+ignore 1 lines
+(employee_id, working_time_id, forms_of_remuneration_id, wage_system_id, appointment_date, payment_date, compensation_payments_id);
+
+load data infile 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\positions.csv'
+into table positions
+fields terminated by ','
+ignore 1 lines
+(name, salary, working_days);
+
+load data infile 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\employee_to_positions.csv'
+into table employee_to_positions
+fields terminated by ','
+ignore 1 lines
+(positions_id, employee_id);
+
+-- ----------------Запросы из 4 лабораторной --------------------
+############Все выплаты между январем 21 и 22 года
+SET PROFILING = 1;
+ select
+pay.pay_id,
+e.full_name as 'Имя сотрудника',
+p.name as 'Должность',
+p.salary as 'Оклад',
+int_p.type as 'Тип поощрения',
+int_p.amound as 'Размер поощрения',
+f.type as 'Тип штрафа',
+f.amound as 'Размер штрафа',
+f_to_p.numbers as 'Количество штрафов',
+c_p.name as 'Название компенсационной выплаты',
+c_p.amound as 'Размер компенсационной выплаты',
+w_t.rate_over_time as 'Коэффициент за время',
+rate_over_turnover.rate_over_turnover as 'Коэффициент за оборот',
+p.salary + #Оклад
+IFNULL(c_p.amound, 0) + #Компенсационные
+if(int_p.type like 'Сумма', 3000, 0) - #Поощрения
+if(f.type like 'Сумма', 3000, 0) + #Штраф
+(
+p.salary * if(int_p.type is null, 1, if(int_p.type like 'Процент', 0.1, 1)) * #Оклад * поощрение в процентах * 
+if(f.type is null, 1, if(f.type like 'Процент', f_to_p.numbers * 0.1, 1)) * #штраф в процентах на кол-во штрафов
+IF(w_t.rate_over_time IS NULL, 1, w_t.rate_over_time) * #Рейтинг за время
+IF(rate_over_turnover.rate_over_turnover IS NULL, 1, rate_over_turnover.rate_over_turnover) #Рейтинг за оклад
+)
+as 'Итог'
+from pay
+left join employee as e
+on pay.employee_id = e.employee_id
+left join employee_to_positions as e_to_p
+on e.employee_id = e_to_p.employee_id
+left join positions as p
+on p.positions_id = e_to_p.positions_id
+left join Incentive_payments_to_pay as int_to_p
+on pay.pay_id = int_to_p.pay_id
+left join incentive_payments as int_p
+on int_to_p.incentive_payments_id = int_p.incentive_payments_id
+left join subdivision as sub
+on e.subdivision_id = sub.subdivision_id
+left join rate_over_turnover
+on sub.rate_over_turnover_id = rate_over_turnover.rate_over_turnover_id
+left join fines_to_pay as f_to_p
+on pay.pay_id = f_to_p.pay_id
+left join fines as f
+on f_to_p.fines_id = f.fines_id
+left join Compensation_payments as c_p
+on pay.compensation_payments_id = c_p.compensation_payments_id
+left join working_time as w_t
+on pay.working_time_id = w_t.working_time_id
+WHERE (pay.payment_date between '2021-01-01' and '2022-01-01');
+SHOW PROFILES;
+
+-- -------------Добавление индексов -------------------
+alter table pay add index
+payment_date(payment_date);
+alter table incentive_payments add index
+type_amound(type, amound);
+
+#############Вывести имя, к. за часы, тип оплаты и систему оплаты для каждого сотрудника
+SET PROFILING = 1;
+ select
+pay.pay_id,
+employee.full_name as 'Полное имя',
+working_time.rate_over_time as 'Коэффициент за рабочие часы',
+forms_of_remuneration.name as 'Тип оплаты',
+wage_system.name as 'Система оплаты'
+from pay
+join employee
+on pay.employee_id = employee.employee_id
+join working_time
+on pay.working_time_id = working_time.working_time_id
+join forms_of_remuneration
+on pay.forms_of_remuneration_id = forms_of_remuneration.forms_of_remuneration_id
+join wage_system
+on pay.wage_system_id = wage_system.wage_system_id
+order by pay.pay_id;
+SHOW PROFILES;
+
+-- -------------Добавление индексов -------------------
+alter table working_time add index
+rate_over_time(rate_over_time);
+alter table forms_of_remuneration add index
+name(name);
+
+
+############Вывести работника и систему оплаты труда
+SET PROFILING = 1;
+explain select
+  pay.employee_id,
+  wage_system.name as 'Система оплаты труда',
+  employee.full_name as 'Сотрудник'
+FROM
+  pay
+  STRAIGHT_JOIN  employee
+  ON pay.employee_id=employee.employee_id
+  JOIN wage_system
+  ON pay.wage_system_id = wage_system.wage_system_id
+  order by employee.employee_id; 
+    SHOW PROFILES;
+    
+-- -------------Добавление индексов -------------------
+alter table wage_system add index
+name(name);
+alter table wage_system add index
+wage_system_id(wage_system_id);
+
+############Вывести все должности и всех работников с этими должностями
+ SET PROFILING = 1;
+explain SELECT 
+positions.name as 'Должности', 
+GROUP_CONCAT(employee.full_name) as 'Сотрудники'
+FROM employee_to_positions
+STRAIGHT_JOIN positions
+on employee_to_positions.positions_id = positions.positions_id
+join employee
+on employee_to_positions.employee_id = employee.employee_id
+group by positions.positions_id;
+SHOW PROFILES;
+
+-- -------------Добавление индексов -------------------
+alter table pay add index
+employee_id(employee_id);
+alter table employee add index
+full_name(full_name);
+
+#Должности по кол-ву сотрудников
+SET PROFILING = 1;
+explain select
+COUNT(employee_to_positions.employee_id) AS c,  
+positions.name as 'Должности'
+from
+employee_to_positions
+join positions
+on employee_to_positions.positions_id = positions.positions_id
+GROUP BY employee_to_positions.positions_id 
+order by c desc;
+SHOW PROFILES;
+-- -------------Добавление индексов -------------------
+show index from employee_to_positions;
+alter table employee_to_positions add index
+positions_id(positions_id);
+
+
+-- ------------------Функции---------------------------
+
+-- ------------Функция, возвращающая возраст
+ CREATE FUNCTION `get_age` 
+   (
+   `date_of_birth` DATE,
+   `current_time` DATETIME
+	)
+ RETURNS INT(11) DETERMINISTIC NO SQL SQL SECURITY DEFINER
+ RETURN ((YEAR(current_time) - YEAR(date_of_birth)) - ((DATE_FORMAT(current_time, '00-%m-%d') < DATE_FORMAT(date_of_birth, '00-%m-%d'))));
+
+-- ------------Выводит всех сотрудников, сортированных от старшего к младшему 
+SELECT 
+full_name as 'Имя',
+get_age(birth_date, NOW()) AS 'Возраст'
+
+FROM employee
+where (get_age(birth_date, NOW())) > 20
+order by get_age(birth_date, NOW()) desc;
+ 
+-- -----------Функция, возвращающая правильный Коэффициент за выручку
+DELIMITER //
+CREATE FUNCTION `right_rate_over_turnover` (sales_plan int, summ int)
+RETURNS float DETERMINISTIC NO SQL SQL SECURITY DEFINER
+BEGIN
+ 
+   DECLARE right_rate_over_turnover float;
+ 
+   CASE
+    WHEN summ < sales_plan THEN set right_rate_over_turnover = 0.9;
+    WHEN summ = sales_plan THEN set right_rate_over_turnover = 1.0;
+    ELSE set right_rate_over_turnover = 1.1;
+END CASE;
+ 
+   RETURN right_rate_over_turnover;
+ 
+END; //
+DELIMITER ;
+
+-- ----------Выводит коэффициент за выручку и правильный коэффициент за выручку
+SELECT 
+#subdivision.subdivision_id, 
+subdivision.name as 'Подразделение компании', 
+#subdivision.sales_plan as 'План',
+#turnover.summ as 'Выручка',
+rate_over_turnover.rate_over_turnover as 'Коэффициент за выручку',
+right_rate_over_turnover(subdivision.sales_plan, turnover.summ) as 'Правильный коэффициент за выручку'
+
+FROM
+  subdivision
+JOIN turnover
+    ON subdivision.turnover_id = turnover.turnover_id
+JOIN rate_over_turnover
+	ON subdivision.rate_over_turnover_id = rate_over_turnover.rate_over_turnover_id;
+
+
+-- -----------Функция, сравнивающая коэффициент за выручку и правильный коэффициент за выручку
+DELIMITER //
+CREATE FUNCTION `compare_rate_over_turnover` (rate_over_turnover float, right_rate_over_turnover float)
+RETURNS varchar(8) DETERMINISTIC NO SQL SQL SECURITY DEFINER
+BEGIN
+ 
+   DECLARE compare_rate_over_turnover varchar(8);
+ 
+   CASE
+    WHEN rate_over_turnover = right_rate_over_turnover THEN set compare_rate_over_turnover = 'Верно';
+    ELSE set compare_rate_over_turnover = 'Неверно';
+END CASE;
+ 
+   RETURN compare_rate_over_turnover;
+ 
+END; //
+DELIMITER ;
+
+-- ----------Выводит коэффициент за выручку и правильный коэффициент за выручку
+SELECT 
+#subdivision.subdivision_id, 
+subdivision.name as 'Подразделение компании', 
+#subdivision.sales_plan as 'План',
+#turnover.summ as 'Выручка',
+r_over_t.rate_over_turnover as 'Коэффициент за выручку',
+right_rate_over_turnover(subdivision.sales_plan, turnover.summ) as 'Правильный коэффициент за выручку',
+compare_rate_over_turnover(r_over_t.rate_over_turnover, right_rate_over_turnover(subdivision.sales_plan, turnover.summ)) as 'Результат сравнения'
+
+FROM
+  subdivision
+JOIN turnover
+    ON subdivision.turnover_id = turnover.turnover_id
+JOIN rate_over_turnover as r_over_t
+	ON subdivision.rate_over_turnover_id = r_over_t.rate_over_turnover_id;
+    
+-- -----------Функция, отбрасывающая строку после разделителя
+DELIMITER //
+CREATE FUNCTION `split_string` (str VARCHAR(150), delimiter VARCHAR(5), position INT)
+RETURNS varchar(150) DETERMINISTIC NO SQL SQL SECURITY DEFINER
+BEGIN
+ 
+ DECLARE split_string varchar(150);
+ #REPLACE(поле, что_менять, на_что_менять) 
+ #SUBSTRING(поле, начальная позиция, длина)
+ #SUBSTRING_INDEX(string, delimiter, number) возвращает подстроку из string перед появлениям (number) вхождений разделителя (delim)
+ RETURN REPLACE(
+	SUBSTRING(SUBSTRING_INDEX(str, delimiter, position),
+	LENGTH(SUBSTRING_INDEX(str, delimiter, position-1)) + 1),
+	delimiter, '');
+ 
+END; //
+DELIMITER ;    
+
+SELECT 
+full_name as 'Полное имя',
+split_string('+7-988-011-11-11', '-', 1) as 'Строка до разделителя',
+split_string(full_name, ' ', 1) as 'Строка до разделителя'
+from
+employee;
+
+-- ------------------------Процедуры--------------------------
+-- -----------Выдает список людей заданного возраста----------
+DELIMITER //
+CREATE PROCEDURE get_employeers_age (needed_age int)
+BEGIN
+    SELECT 
+full_name as 'Имя',
+get_age(birth_date, NOW()) AS 'Возраст'
+
+FROM employee
+where (get_age(birth_date, NOW())) = needed_age;
+END //
+DELIMITER ;
+
+CALL get_employeers_age(30);
+
+-- ------------Выведет подразделения, где оборот маленький (0-500.000), средний (500.000-50.000.000), большой (>50 000 000)
+DELIMITER //
+CREATE PROCEDURE get_turnover(str VARCHAR(30))
+BEGIN
+    CASE str
+    WHEN "Маленький"
+    THEN
+        select
+		subdivision_id,
+        name as 'Название подразделения',
+		sales_plan as 'План продаж'
+		from
+		subdivision
+		group by sales_plan
+		having subdivision.sales_plan <= 5000000;
+    WHEN "Средний"
+    THEN
+        select
+		subdivision_id,
+        name as 'Название подразделения',
+		sales_plan as 'План продаж'
+		from
+		subdivision
+		group by sales_plan
+		having subdivision.sales_plan <= 50000000;
+    WHEN "Большой"
+    THEN
+        select
+		subdivision_id,
+        name as 'Название подразделения',
+		sales_plan as 'План продаж'
+		from
+		subdivision
+		group by sales_plan
+		having subdivision.sales_plan > 5000000;
+    END CASE;
+END //
+DELIMITER ;
+
+CALL get_turnover("Маленький");
+CALL get_turnover("Средний");
+CALL get_turnover("Большой");
+
+-- -Определяет лучшее подразделение по суммарному значению продаж за период дат, полученных в аргументах
+DELIMITER //
+CREATE PROCEDURE best_sales_subdivision (d1 DATE, d2 DATE)
+BEGIN
+SELECT 
+    subdivision.subdivision_id,
+    subdivision.name AS 'Название подразделения',
+    turnover.summ as 'Оборот в месяц'
+    FROM 
+    subdivision
+    JOIN turnover
+    ON subdivision.turnover_id = turnover.turnover_id
+    and turnover.over_date BETWEEN d1 and d2
+    GROUP BY subdivision.subdivision_id
+    ORDER BY (turnover.summ) DESC
+    LIMIT 1;
+END // 
+DELIMITER ; 
+
+CALL best_sales_subdivision ('2010-01-01', '2019-01-01');
+
+
+-- ------------------------Представления----------------------
+create view final_table
+as
+select
+pay.pay_id,
+e.full_name as 'Имя сотрудника',
+p.name as 'Должность',
+p.salary as 'Оклад',
+int_p.type as 'Тип поощрения',
+int_p.amound as 'Размер поощрения',
+f.type as 'Тип штрафа',
+f.amound as 'Размер штрафа',
+f_to_p.numbers as 'Количество штрафов',
+c_p.name as 'Название компенсационной выплаты',
+c_p.amound as 'Размер компенсационной выплаты',
+w_t.rate_over_time as 'Коэффициент за время',
+rate_over_turnover.rate_over_turnover as 'Коэффициент за оборот',
+p.salary + #Оклад
+IFNULL(c_p.amound, 0) + #Компенсационные
+if(int_p.type like 'Сумма', 3000, 0) - #Поощрения
+if(f.type like 'Сумма', 3000, 0) + #Штраф
+(
+p.salary * if(int_p.type is null, 1, if(int_p.type like 'Процент', 0.1, 1)) * #Оклад * поощрение в процентах * 
+if(f.type is null, 1, if(f.type like 'Процент', f_to_p.numbers * 0.1, 1)) * #штраф в процентах на кол-во штрафов
+IF(w_t.rate_over_time IS NULL, 1, w_t.rate_over_time) * #Рейтинг за время
+IF(rate_over_turnover.rate_over_turnover IS NULL, 1, rate_over_turnover.rate_over_turnover) #Рейтинг за оклад
+)
+as 'Итог'
+from pay
+left join employee as e
+on pay.employee_id = e.employee_id
+left join employee_to_positions as e_to_p
+on e.employee_id = e_to_p.employee_id
+left join positions as p
+on p.positions_id = e_to_p.positions_id
+left join Incentive_payments_to_pay as int_to_p
+on pay.pay_id = int_to_p.pay_id
+left join incentive_payments as int_p
+on int_to_p.incentive_payments_id = int_p.incentive_payments_id
+left join subdivision as sub
+on e.subdivision_id = sub.subdivision_id
+left join rate_over_turnover
+on sub.rate_over_turnover_id = rate_over_turnover.rate_over_turnover_id
+left join fines_to_pay as f_to_p
+on pay.pay_id = f_to_p.pay_id
+left join fines as f
+on f_to_p.fines_id = f.fines_id
+left join Compensation_payments as c_p
+on pay.compensation_payments_id = c_p.compensation_payments_id
+left join working_time as w_t
+on pay.working_time_id = w_t.working_time_id;
+
+select * from final_table;
+
+create view turnover_table
+as
+SELECT 
+subdivision.subdivision_id, 
+subdivision.name as 'Подразделение компании', 
+subdivision.sales_plan as 'План',
+turnover.summ as 'Выручка',
+rate_over_turnover.rate_over_turnover as 'Коэффициент за выручку'
+FROM
+  subdivision
+  JOIN turnover
+    ON subdivision.turnover_id = turnover.turnover_id
+JOIN rate_over_turnover
+	ON subdivision.rate_over_turnover_id = rate_over_turnover.rate_over_turnover_id;
+
+select * from turnover_table;
+
+
+create view peoples_positions_table
+as
+SELECT 
+positions.name as 'Должности', 
+GROUP_CONCAT(employee.full_name) as 'Сотрудники'
+FROM employee_to_positions
+join positions
+on employee_to_positions.positions_id = positions.positions_id
+join employee
+on employee_to_positions.employee_id = employee.employee_id
+group by positions.positions_id;
+
+select * from peoples_positions_table;
+
+-- --------------Тригеры-----------------
+-- ---------Проверяет, что сумма не больше выходит за пределы от 0 до 10000000000
+DELIMITER //
+CREATE TRIGGER summ_check 
+BEFORE INSERT ON turnover 
+FOR EACH ROW
+BEGIN
+    IF NEW.summ < 0 THEN SET NEW.summ = 0;
+    ELSEIF NEW.summ > 10000000000 THEN SET NEW.summ = 10000000000;
+    END IF;
+END // 
+DELIMITER ; 
+
+INSERT INTO turnover (start_date, over_date, summ) 
+VALUES ('2021-05-24', '2021-06-24', '-5');
+
+-- ------------------Модификация----------------------
+-- -Для заданного сотрудника вывести все его выплаты за заданный период с заданной системой оплаты
+SET PROFILING = 1;
+select
+pay.pay_id,
+e.full_name as 'Имя сотрудника',
+p.name as 'Должность',
+wage_system.name as 'Тип оплаты',
+p.salary + #Оклад
+IFNULL(c_p.amound, 0) + #Компенсационные
+if(int_p.type like 'Сумма', 3000, 0) - #Поощрения
+if(f.type like 'Сумма', 3000, 0) + #Штраф
+(
+p.salary * if(int_p.type is null, 1, if(int_p.type like 'Процент', 0.1, 1)) * #Оклад * поощрение в процентах * 
+if(f.type is null, 1, if(f.type like 'Процент', f_to_p.numbers * 0.1, 1)) * #штраф в процентах на кол-во штрафов
+IF(w_t.rate_over_time IS NULL, 1, w_t.rate_over_time) * #Рейтинг за время
+IF(rate_over_turnover.rate_over_turnover IS NULL, 1, rate_over_turnover.rate_over_turnover) #Рейтинг за оклад
+)
+as 'Итог'
+from pay
+left join employee as e
+on pay.employee_id = e.employee_id
+left join employee_to_positions as e_to_p
+on e.employee_id = e_to_p.employee_id
+left join positions as p
+on p.positions_id = e_to_p.positions_id
+left join Incentive_payments_to_pay as int_to_p
+on pay.pay_id = int_to_p.pay_id
+left join incentive_payments as int_p
+on int_to_p.incentive_payments_id = int_p.incentive_payments_id
+left join subdivision as sub
+on e.subdivision_id = sub.subdivision_id
+left join rate_over_turnover
+on sub.rate_over_turnover_id = rate_over_turnover.rate_over_turnover_id
+left join fines_to_pay as f_to_p
+on pay.pay_id = f_to_p.pay_id
+left join fines as f
+on f_to_p.fines_id = f.fines_id
+left join Compensation_payments as c_p
+on pay.compensation_payments_id = c_p.compensation_payments_id
+left join working_time as w_t
+on pay.working_time_id = w_t.working_time_id
+left join wage_system
+on pay.wage_system_id = wage_system.wage_system_id
+where (e.employee_id between 3 and 10)
+and (pay.payment_date between '2000-01-01' and '2020-01-01')
+and (wage_system.name like 'Cдельная')
+order by pay.pay_id;
+SHOW PROFILES;
+
+show indexes from pay;
+show indexes from wage_system;
+show indexes from employee;
+-- ------------------Добавление индексов---------------------------
+alter table pay add index
+payment_date(payment_date);
+
+
+-- ------------Выведет подразделения, где оборот маленький (0-500.000), средний (500.000-50.000.000), большой (>50 000 000)
+DELIMITER //
+CREATE PROCEDURE get_turnover_mod(str VARCHAR(30))
+BEGIN
+DECLARE x int;
+set x = 0;
+    CASE str
+    WHEN "Маленький" THEN set x = 5000000;
+    WHEN "Средний" THEN set x = 50000000;
+	WHEN "Большой" THEN set x = 10000000000;
+    END CASE;
+        select
+		subdivision_id,
+        name as 'Название подразделения',
+		sales_plan as 'План продаж'
+		from
+		subdivision
+		group by sales_plan
+		having subdivision.sales_plan <= x;
+    
+END //
+DELIMITER ;
+
+CALL get_turnover_mod("Маленький");
+CALL get_turnover_mod("Средний");
+CALL get_turnover_mod("Большой");
+
+
+-- ------При добавлении сотрудника сразу добавить ему выплату (оклад)----------- 
+INSERT INTO positions (positions_id, name, salary, working_days) VALUES ('2011', 'Джун', '13890', '0');
+DELIMITER //
+CREATE TRIGGER mrot
+AFTER INSERT ON employee 
+FOR EACH ROW
+BEGIN
+     insert into employee_to_positions (employee_id, positions_id) values 
+     (NEW.employee_id, 2011);
+END // 
+DELIMITER ; 
+
+INSERT INTO employee (full_name, birth_date, subdivision_id) 
+VALUES ('Мамдани Антон Константинович', '1990-06-24', '5');
+
+SELECT
+ positions.name as 'Должность',
+ employee.full_name 'Имя сотрудника',
+ positions.salary as 'Оклад'
+FROM
+  employee_to_positions
+   JOIN positions
+    ON  employee_to_positions.positions_id = positions.positions_id
+    
+   JOIN employee
+    ON  employee_to_positions.employee_id = employee.employee_id
+    
+    order by employee.employee_id desc
+    limit 1;
